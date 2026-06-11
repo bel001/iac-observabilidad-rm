@@ -274,3 +274,25 @@ Finalmente guarde la regla desde Grafana.
 La regla quedo creada con intervalo de evaluacion de `10s`, etiqueta `severity = warning`, contact point configurado y condicion **A is above 50**.
 
 ![Regla de alarma guardada](evidencias/alarma-regla-guardada.png)
+
+## Prueba de la alarma de CPU
+
+Para validar la alarma genere carga de CPU sobre el backend desde el frontend del laboratorio. Durante la prueba, el panel **CPU contenedor backend (%)** supero el umbral de 50%, por lo que la condicion configurada en Grafana empezo a cumplirse.
+
+![CPU del backend por encima del 50%](evidencias/prueba-cpu-backend-supera-50.png)
+
+Luego revise la regla en **Alerting -> Alert rules**. Primero paso a estado **Pending**, respetando el pending period de `30s`.
+
+![Alarma en estado Pending](evidencias/alarma-estado-pending.png)
+
+Despues de mantenerse sobre el umbral, la regla paso a estado **Firing**, que es la evidencia principal de que la alarma funciono correctamente.
+
+![Alarma en estado Firing](evidencias/alarma-estado-firing.png)
+
+Cuando termino la carga de CPU, la metrica bajo nuevamente y la regla regreso a estado **Normal**.
+
+![Alarma de vuelta a Normal](evidencias/alarma-vuelve-normal.png)
+
+El historial de estados muestra el recorrido completo de la prueba: **Pending -> Alerting/Firing -> Normal**.
+
+![Historial de estados de la alarma](evidencias/historial-estados-alarma.png)

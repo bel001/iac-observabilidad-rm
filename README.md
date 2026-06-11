@@ -46,6 +46,16 @@ La condicion quedo como **IS ABOVE 50**, con etiqueta `severity = warning`, grup
 
 ![Regla de alarma guardada](evidencias/alarma-regla-guardada.png)
 
+## Prueba de la alarma
+
+Genere carga de CPU en el backend y verifique que el panel superara el 50%. Luego confirme en Grafana Alerting el cambio de estado de la regla: **Pending**, **Firing** y regreso a **Normal**.
+
+![CPU del backend por encima del 50%](evidencias/prueba-cpu-backend-supera-50.png)
+
+![Alarma en estado Firing](evidencias/alarma-estado-firing.png)
+
+![Alarma de vuelta a Normal](evidencias/alarma-vuelve-normal.png)
+
 ## Reset
 ```bash
 docker compose down -v   # borra también dashboards/alarmas creados
