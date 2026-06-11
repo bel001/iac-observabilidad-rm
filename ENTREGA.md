@@ -12,7 +12,7 @@ Clone el repositorio base del laboratorio dentro de mi carpeta local de trabajo:
 git clone https://github.com/UPAO-Recursos/iac-observabilidad.git .
 ```
 
-![Clonacion del repositorio](evidencias/0.png)
+![Clonacion del repositorio](evidencias/clonacion-repositorio.png)
 
 Luego confirme que Docker y Docker Compose estuvieran disponibles en mi maquina:
 
@@ -21,7 +21,7 @@ docker --version
 docker compose version
 ```
 
-![Versiones de Docker y Docker Compose](evidencias/1.png)
+![Versiones de Docker y Docker Compose](evidencias/versiones-docker.png)
 
 ### Ajuste inicial en Linux
 
@@ -31,7 +31,7 @@ Al ejecutar el stack por primera vez aparecio el siguiente error asociado al mon
 path / is mounted on / but it is not a shared or slave mount
 ```
 
-![Error inicial de montaje](evidencias/3.png)
+![Error inicial de montaje](evidencias/error-montaje-linux.png)
 
 Revise el servicio `node-exporter` en `docker-compose.yml`. El volumen venia con la opcion `rslave`:
 
@@ -39,7 +39,7 @@ Revise el servicio `node-exporter` en `docker-compose.yml`. El volumen venia con
 - /:/host:ro,rslave
 ```
 
-![Configuracion original del montaje](evidencias/4.png)
+![Configuracion original del montaje](evidencias/montaje-original-node-exporter.png)
 
 Para mi entorno Linux lo ajuste a:
 
@@ -47,7 +47,7 @@ Para mi entorno Linux lo ajuste a:
 - /:/host:ro
 ```
 
-![Configuracion corregida del montaje](evidencias/5.png)
+![Configuracion corregida del montaje](evidencias/montaje-corregido-node-exporter.png)
 
 Con ese cambio el stack pudo levantarse correctamente.
 
@@ -61,11 +61,11 @@ docker compose up -d --build
 
 La construccion de las imagenes del backend y frontend se completo correctamente.
 
-![Construccion del stack](evidencias/6.png)
+![Construccion del stack](evidencias/construccion-pila.png)
 
 Al finalizar, Docker Compose creo y levanto los contenedores del laboratorio.
 
-![Stack levantado](evidencias/7.png)
+![Stack levantado](evidencias/pila-levantada.png)
 
 Despues verifique el estado general con:
 
@@ -75,7 +75,7 @@ docker compose ps
 
 En la salida se observan los servicios principales arriba: `lab-backend`, `lab-frontend`, `lab-grafana`, `lab-prometheus`, `lab-loki`, `lab-alloy`, `lab-cadvisor` y `lab-node-exporter`.
 
-![Estado de contenedores](evidencias/8.png)
+![Estado de contenedores](evidencias/estado-contenedores.png)
 
 Tambien deje registrado el commit local del ajuste de Linux:
 
@@ -84,7 +84,7 @@ git add docker-compose.yml
 git commit -m "fix: corrige montaje de node exporter en linux"
 ```
 
-![Commit del ajuste Linux](evidencias/9.png)
+![Commit del ajuste Linux](evidencias/commit-ajuste-linux.png)
 
 ### Servicios accesibles
 
@@ -96,11 +96,11 @@ http://localhost:8080
 
 La pagina del laboratorio cargo correctamente y pude ejecutar el boton **Saludar (API)**, lo que confirma la comunicacion con el backend.
 
-![Frontend funcionando](evidencias/front1.png)
+![Frontend funcionando](evidencias/interfaz-funcionando.png)
 
 Tambien probe el boton de carga de CPU desde el frontend. Esta accion se usara mas adelante para validar la alarma de CPU.
 
-![Frontend generando carga](evidencias/front2.png)
+![Frontend generando carga](evidencias/interfaz-carga-cpu.png)
 
 Verifique el endpoint de metricas del backend en:
 
@@ -110,7 +110,7 @@ http://localhost:3001/metrics
 
 La respuesta muestra metricas en formato Prometheus, incluyendo metricas de CPU, memoria y estado del proceso del backend.
 
-![Metricas del backend](evidencias/Backend.png)
+![Metricas del backend](evidencias/metricas-backend.png)
 
 Verifique que Grafana estuviera accesible en:
 
@@ -120,11 +120,11 @@ http://localhost:3000
 
 Primero se muestra la pantalla de login.
 
-![Login de Grafana](evidencias/Grafana1.png)
+![Login de Grafana](evidencias/inicio-sesion-grafana.png)
 
 Luego ingrese con el usuario `admin` y confirme que Grafana cargara correctamente.
 
-![Grafana accesible](evidencias/grafana2.png)
+![Grafana accesible](evidencias/grafana-accesible.png)
 
 Finalmente, verifique que Prometheus estuviera disponible en:
 
@@ -132,7 +132,7 @@ Finalmente, verifique que Prometheus estuviera disponible en:
 http://localhost:9090
 ```
 
-![Prometheus accesible](evidencias/Prometheus.png)
+![Prometheus accesible](evidencias/prometheus-accesible.png)
 
 Los servicios esperados para continuar el laboratorio son:
 
@@ -155,11 +155,11 @@ Despues de levantar el stack, verifique que Grafana tuviera las fuentes de datos
 
 Tambien probe la conexion de Prometheus desde Grafana. La prueba fue correcta y confirma que Grafana puede consultar las metricas del stack.
 
-![Prueba correcta de Prometheus](evidencias/prometheus-test-ok.png)
+![Prueba correcta de Prometheus](evidencias/prueba-prometheus-correcta.png)
 
 Luego hice la misma validacion con Loki. Esta prueba confirma que Grafana tambien puede consultar los logs recolectados por Alloy.
 
-![Prueba correcta de Loki](evidencias/loki-test-ok.png)
+![Prueba correcta de Loki](evidencias/prueba-loki-correcta.png)
 
 ## Dashboard de metricas y logs
 
@@ -179,7 +179,7 @@ En mi entorno esa consulta no devolvio datos porque cAdvisor no expuso la etique
 docker inspect -f '{{.Id}}' lab-backend
 ```
 
-![ID del contenedor backend](evidencias/id-backend-docker.png)
+![ID del contenedor backend](evidencias/id-contenedor-backend.png)
 
 Con ese dato use la etiqueta `id` que si aparece en Prometheus:
 
@@ -189,11 +189,11 @@ sum(rate(container_cpu_usage_seconds_total{id="/docker/bf8413fd5c89dcd830e2ba4df
 
 Este panel muestra el consumo de CPU del contenedor backend. Lo configure como **Time series** y con unidad **Percent (0-100)**.
 
-![Panel de CPU del backend](evidencias/cpu-backend-query.png)
+![Panel de CPU del backend](evidencias/cpu-contenedor-backend-consulta.png)
 
 Tambien agregue el umbral en `50` para marcar visualmente cuando el backend supera el limite pedido en el laboratorio.
 
-![Umbral del panel de CPU del backend](evidencias/cpu-backend-threshold.png)
+![Umbral del panel de CPU del backend](evidencias/cpu-contenedor-backend-umbral.png)
 
 ### CPU del host
 
@@ -205,7 +205,7 @@ Para la metrica de infraestructura general cree el panel **CPU del host (%)** co
 
 Este panel representa el uso de CPU de la maquina completa, distinto al panel anterior que se enfoca solo en el contenedor del backend.
 
-![Panel de CPU del host](evidencias/cpu-host-query.png)
+![Panel de CPU del host](evidencias/cpu-anfitrion-consulta.png)
 
 ### Logs de aplicacion
 
@@ -225,7 +225,7 @@ Tambien probe el filtro por nivel de error:
 {tier="application"} | json | level="ERROR"
 ```
 
-![Logs de aplicacion filtrados por error](evidencias/logs-aplicacion-error.png)
+![Logs de aplicacion filtrados por error](evidencias/logs-aplicacion-errores.png)
 
 ### Logs de infraestructura
 
@@ -243,4 +243,34 @@ Este panel muestra logs de servicios del stack como Grafana, Loki, Prometheus y 
 
 Finalmente guarde el dashboard con los cuatro paneles solicitados por la guia: dos de metricas y dos de logs.
 
-![Dashboard final](evidencias/dashboard-final.png)
+![Dashboard final](evidencias/dashboard-final-observabilidad.png)
+
+## Alarma de CPU del backend
+
+Configure una regla de alerta en Grafana para validar el criterio de CPU mayor al 50%. La regla se llama **CPU backend > 50%** y usa Prometheus como fuente de datos.
+
+La consulta propuesta en la guia usa `name="lab-backend"`, pero en mi entorno cAdvisor no expuso esa etiqueta. Por eso use la misma consulta validada en el dashboard, filtrando por el `id` real del contenedor backend:
+
+```promql
+sum(rate(container_cpu_usage_seconds_total{id="/docker/bf8413fd5c89dcd830e2ba4dfb77fdf9a0e1adb93632eed96455d8262d26a24c"}[1m])) * 100
+```
+
+La condicion de la alarma quedo como **IS ABOVE 50**, que equivale a disparar la alerta cuando el backend supera el 50% de CPU.
+
+![Consulta y condicion de la alarma](evidencias/alarma-consulta-condicion.png)
+
+Luego ubique la regla dentro de la carpeta **Observabilidad**, agregue la etiqueta `severity = warning` y configure el grupo de evaluacion **Backend CPU Alerts** con intervalo de `10s`. Tambien configure el **Pending period** en `30s`.
+
+![Carpeta, etiqueta y evaluacion de la alarma](evidencias/alarma-carpeta-etiqueta-evaluacion.png)
+
+Para las notificaciones seleccione el contact point **Webhook Backend Lab**, que apunta al backend del laboratorio. Esto deja preparada la regla para el cierre del ciclo alarma -> log.
+
+![Contact point de la alarma](evidencias/alarma-contacto-webhook.png)
+
+Finalmente guarde la regla desde Grafana.
+
+![Guardar regla de alarma](evidencias/alarma-guardar-regla.png)
+
+La regla quedo creada con intervalo de evaluacion de `10s`, etiqueta `severity = warning`, contact point configurado y condicion **A is above 50**.
+
+![Regla de alarma guardada](evidencias/alarma-regla-guardada.png)

@@ -28,6 +28,24 @@ docker compose up -d --build
 - El **dashboard** (paneles de CPU + logs de app e infra).
 - La **alarma** de CPU > 50%.
 
+## Alarma de CPU del backend
+
+Configure una alerta en Grafana llamada **CPU backend > 50%**. En mi entorno cAdvisor no expuso la etiqueta `name="lab-backend"`, por eso use el `id` real del contenedor backend en la consulta:
+
+```promql
+sum(rate(container_cpu_usage_seconds_total{id="/docker/bf8413fd5c89dcd830e2ba4dfb77fdf9a0e1adb93632eed96455d8262d26a24c"}[1m])) * 100
+```
+
+La condicion quedo como **IS ABOVE 50**, con etiqueta `severity = warning`, grupo de evaluacion **Backend CPU Alerts**, intervalo de `10s`, pending period de `30s` y contact point **Webhook Backend Lab**.
+
+![Consulta y condicion de la alarma](evidencias/alarma-consulta-condicion.png)
+
+![Evaluacion y etiquetas de la alarma](evidencias/alarma-carpeta-etiqueta-evaluacion.png)
+
+![Contact point de la alarma](evidencias/alarma-contacto-webhook.png)
+
+![Regla de alarma guardada](evidencias/alarma-regla-guardada.png)
+
 ## Reset
 ```bash
 docker compose down -v   # borra también dashboards/alarmas creados
