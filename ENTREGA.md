@@ -146,3 +146,101 @@ Los servicios esperados para continuar el laboratorio son:
 | Alloy | `http://localhost:12345` | Estado del recolector de logs |
 | cAdvisor | `http://localhost:8081` | Metricas de contenedores |
 | node-exporter | `http://localhost:9100/metrics` | Metricas del host |
+
+## Fuentes de datos en Grafana
+
+Despues de levantar el stack, verifique que Grafana tuviera las fuentes de datos creadas por provisioning. En **Connections -> Data sources** aparecen **Prometheus** y **Loki**, por lo que no tuve que registrarlas manualmente desde la interfaz.
+
+![Fuentes de datos en Grafana](evidencias/fuentes-datos-grafana.png)
+
+Tambien probe la conexion de Prometheus desde Grafana. La prueba fue correcta y confirma que Grafana puede consultar las metricas del stack.
+
+![Prueba correcta de Prometheus](evidencias/prometheus-test-ok.png)
+
+Luego hice la misma validacion con Loki. Esta prueba confirma que Grafana tambien puede consultar los logs recolectados por Alloy.
+
+![Prueba correcta de Loki](evidencias/loki-test-ok.png)
+
+## Dashboard de metricas y logs
+
+Cree un dashboard llamado **Observabilidad -- Rodrigo** con cuatro paneles: CPU del contenedor backend, CPU del host, logs de aplicacion y logs de infraestructura.
+
+### CPU del contenedor backend
+
+Primero intente usar la consulta base del laboratorio:
+
+```promql
+sum(rate(container_cpu_usage_seconds_total{name="lab-backend"}[1m])) * 100
+```
+
+En mi entorno esa consulta no devolvio datos porque cAdvisor no expuso la etiqueta `name` para el contenedor. Para mantener el objetivo del laboratorio, identifique el ID real del contenedor `lab-backend` con:
+
+```bash
+docker inspect -f '{{.Id}}' lab-backend
+```
+
+![ID del contenedor backend](evidencias/id-backend-docker.png)
+
+Con ese dato use la etiqueta `id` que si aparece en Prometheus:
+
+```promql
+sum(rate(container_cpu_usage_seconds_total{id="/docker/bf8413fd5c89dcd830e2ba4dfb77fdf9a0e1adb93632eed96455d8262d26a24c"}[1m])) * 100
+```
+
+Este panel muestra el consumo de CPU del contenedor backend. Lo configure como **Time series** y con unidad **Percent (0-100)**.
+
+![Panel de CPU del backend](evidencias/cpu-backend-query.png)
+
+Tambien agregue el umbral en `50` para marcar visualmente cuando el backend supera el limite pedido en el laboratorio.
+
+![Umbral del panel de CPU del backend](evidencias/cpu-backend-threshold.png)
+
+### CPU del host
+
+Para la metrica de infraestructura general cree el panel **CPU del host (%)** con la consulta:
+
+```promql
+100 - (avg(rate(node_cpu_seconds_total{mode="idle"}[1m])) * 100)
+```
+
+Este panel representa el uso de CPU de la maquina completa, distinto al panel anterior que se enfoca solo en el contenedor del backend.
+
+![Panel de CPU del host](evidencias/cpu-host-query.png)
+
+### Logs de aplicacion
+
+Para los logs del frontend y backend use Loki con la consulta:
+
+```logql
+{tier="application"} | json
+```
+
+Con esta consulta pude ver logs JSON de las aplicaciones y campos como `level`, `service` y `msg`.
+
+![Logs de aplicacion](evidencias/logs-aplicacion.png)
+
+Tambien probe el filtro por nivel de error:
+
+```logql
+{tier="application"} | json | level="ERROR"
+```
+
+![Logs de aplicacion filtrados por error](evidencias/logs-aplicacion-error.png)
+
+### Logs de infraestructura
+
+Para los logs de infraestructura use la consulta:
+
+```logql
+{tier="infrastructure"}
+```
+
+Este panel muestra logs de servicios del stack como Grafana, Loki, Prometheus y los recolectores/exporters.
+
+![Logs de infraestructura](evidencias/logs-infraestructura.png)
+
+### Dashboard final
+
+Finalmente guarde el dashboard con los cuatro paneles solicitados por la guia: dos de metricas y dos de logs.
+
+![Dashboard final](evidencias/dashboard-final.png)
