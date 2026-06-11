@@ -296,3 +296,23 @@ Cuando termino la carga de CPU, la metrica bajo nuevamente y la regla regreso a 
 El historial de estados muestra el recorrido completo de la prueba: **Pending -> Alerting/Firing -> Normal**.
 
 ![Historial de estados de la alarma](evidencias/historial-estados-alarma.png)
+
+## Cierre del ciclo alarma a log
+
+Para cerrar el ciclo configure la alerta con el contact point **Webhook Backend Lab**, apuntando a:
+
+```text
+http://backend:3001/alerts
+```
+
+Cuando la alerta entro en estado **Firing**, Grafana envio el webhook al backend. El backend recibio la notificacion y registro un log con el mensaje `grafana_alert_received`.
+
+En la guia se menciona revisar el panel de logs de infraestructura; sin embargo, en este stack el webhook lo recibe el servicio `backend`, por lo que Alloy etiqueta ese evento como log de aplicacion (`tier="application"`). Por eso consulte el evento en Loki con:
+
+```logql
+{tier="application"} | json | msg="grafana_alert_received"
+```
+
+La captura muestra el log generado por el backend despues de recibir la alerta de Grafana. Con esto se evidencia el flujo completo: la metrica supera el umbral, Grafana dispara la alarma, envia el webhook y el backend genera un log observable en Loki.
+
+![Ciclo alarma a log en Loki](evidencias/ciclo-alarma-log-aplicacion.png)

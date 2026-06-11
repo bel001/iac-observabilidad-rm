@@ -56,6 +56,16 @@ Genere carga de CPU en el backend y verifique que el panel superara el 50%. Lueg
 
 ![Alarma de vuelta a Normal](evidencias/alarma-vuelve-normal.png)
 
+## Ciclo alarma a log
+
+El contact point **Webhook Backend Lab** apunta a `http://backend:3001/alerts`. Al dispararse la alerta, Grafana envia el webhook al backend y el backend registra el evento `grafana_alert_received`, visible en Loki como log de aplicacion:
+
+```logql
+{tier="application"} | json | msg="grafana_alert_received"
+```
+
+![Ciclo alarma a log](evidencias/ciclo-alarma-log-aplicacion.png)
+
 ## Reset
 ```bash
 docker compose down -v   # borra también dashboards/alarmas creados
