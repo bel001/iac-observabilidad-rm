@@ -316,3 +316,13 @@ En la guia se menciona revisar el panel de logs de infraestructura; sin embargo,
 La captura muestra el log generado por el backend despues de recibir la alerta de Grafana. Con esto se evidencia el flujo completo: la metrica supera el umbral, Grafana dispara la alarma, envia el webhook y el backend genera un log observable en Loki.
 
 ![Ciclo alarma a log en Loki](evidencias/ciclo-alarma-log-aplicacion.png)
+
+## Explicacion de componentes
+
+Prometheus recolecta y almacena las metricas expuestas por las aplicaciones y los exporters.
+Loki almacena los logs generados por los contenedores para consultarlos desde Grafana.
+Grafana conecta las fuentes de datos, muestra dashboards y administra las reglas de alerta.
+Alloy recolecta los logs de Docker y los envia a Loki con etiquetas como `tier`.
+cAdvisor expone metricas de CPU y recursos por contenedor, como las del backend.
+node-exporter expone metricas generales del host, como CPU de la maquina.
+El frontend y el backend generan trafico, metricas y logs para comprobar el stack completo.
