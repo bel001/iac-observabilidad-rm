@@ -1,7 +1,6 @@
 # Monitoreo
 
-En este laboratorio exploraremos monitoreo con herramientas disponibles
-
+En este laboratorio exploraremos monitoreo con herramientas disponibles. Más información y evidencias de la entrega están en [ENTREGA.md](./ENTREGA.md).
 
 ## Aplicaciones
 ```bash
